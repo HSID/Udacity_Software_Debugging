@@ -2,7 +2,7 @@
 # Simple debugger
 # See instructions around line 34
 import sys
-import readline
+#import readline
 
 # Our buggy program
 def remove_html_markup(s):
@@ -74,7 +74,7 @@ def debug(command, my_locals):
         
     return False
 
-commands = ["p", "s", "p tag", "p foo", "q"]
+#commands = ["p", "s", "p tag", "p foo", "q"]
 
 def input_command():
     #command = raw_input("(my-spyder) ")
@@ -83,8 +83,9 @@ def input_command():
     return command
 
 def traceit(frame, event, trace_arg):
-    global stepping
-
+    #global stepping    -----> I do not need to change these global variables so that
+    #global breakpoints            I do not have to declare them as global
+    
     if event == 'line':
         if stepping or breakpoints.has_key(frame.f_lineno):
             resume = False
