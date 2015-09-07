@@ -35,6 +35,12 @@ class Range:
     # Invoke this for every value
     def track(self, value):
         # YOUR CODE
+		if not self.min and not self.max:
+			self.min = self.max = value
+		elif value < self.min: self.min = value
+		elif self.max < value: self.max = value
+		self.type = value
+		self.set.update([value])
             
     def __repr__(self):
         repr(self.type) + " " + repr(self.min) + ".." + repr(self.max)+ " " + repr(self.set)
@@ -50,8 +56,20 @@ class Invariants:
         
     def track(self, frame, event, arg):
         if event == "call" or event == "return":
-            # YOUR CODE HERE. 
-            # MAKE SURE TO TRACK ALL VARIABLES AND THEIR VALUES
+			# YOUR CODE HERE. 
+			# MAKE SURE TO TRACK ALL VARIABLES AND THEIR VALUES
+			if not (frame.f_code.co_name in self.vars.keys()):
+				self.vars[frame.f_code.co_name] = {}
+			if not (event in self.vars[frame.f_code.co_name].keys()):
+				self.vars[frame.f_code.co_name][event] = {}
+			for var in frame.f_locals:
+				if not (var in self.vars[frame.f_code.co_name][event].keys()):
+					self.vars[frame.f_code.co_name][event][var] = Range()
+				self.vars[frame.f_code.co_name][event][var].track(frame.f_locals[var])
+			if arg:
+				if not ("ret" in self.vars[frame.f_code.co_name][event].keys()):
+					self.vars[frame.f_code.co_name][event]["ret"] = Range()
+				self.vars[frame.f_code.co_name][event]["ret"].track(arg)
     
     def __repr__(self):
         # Return the tracked invariants
@@ -61,16 +79,19 @@ class Invariants:
                 s += event + " " + function + ":\n"
         
                 for var, range in vars.iteritems():
-                    s += "    assert isinstance(" + var + # YOUR CODE
-                    s += "    assert "
-                    if range.min == range.max:
-                        s += var + " == " + repr(range.min)
-                    else:
-                        s += repr(range.min) + " <= " + var + " <= " + repr(range.max)
-                    s += "\n"
+					s += "    assert isinstance(" + var + ", type(" + str(range.type) + "))\n"
+					s += "    assert " + var + " in " + repr(range.set) + "\n"
+					s += "    assert "
+					if range.min == range.max:
+						s += var + " == " + repr(range.min)
+					else:
+						s += repr(range.min) + " <= " + var + " <= " + repr(range.max)
+					s += "\n"
                     # ADD HERE RELATIONS BETWEEN VARIABLES
                     # RELATIONS SHOULD BE ONE OF: ==, <=, >=
-                    s += "    assert " + var + " >= " + var2 + "\n"               
+					for var2, range2 in vars.iteritems():
+						if range2.min >= range.max:
+							s += "    assert " + var + " <= " + var2 + "\n"
         return s
 
 invariants = Invariants()
