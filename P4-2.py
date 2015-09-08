@@ -27,6 +27,7 @@ the_iteration = None
 the_state     = None
 the_diff      = None
 the_input     = None
+the_previous_lineno = None  ## I set it to sense iteration
 
 # FILL IN FROM YOUR SOLUTION IN THE PREVIOUS EXERCISE
 def trace_fetch_state(frame, event, arg):
@@ -34,6 +35,17 @@ def trace_fetch_state(frame, event, arg):
     global the_iteration
     global the_state
     # COPY YOUR CODE HERE
+	global the_previous_lineno
+	if event == "call": the_previous_lineno = None
+	if event == "line":
+		if the_iteration == 1 and frame.f_lineno == the_line:
+			the_state = copy.deepcopy(frame.f_locals)
+		if not the_previous_lineno:
+			the_previous_lineno = frame.f_lineno
+		elif frame.f_lineno < the_previous_lineno:
+			the_iteration -= 1
+		the_previous_lineno = frame.f_lineno
+	return trace_fetch_state
 
 # This function allows you to get the state of the program
 # at specified line and iteration and return it
@@ -66,6 +78,17 @@ def trace_apply_diff(frame, event, arg):
     global the_diff
 
     # YOUR CODE HERE
+	global the_previous_lineno
+	if event == "call": the_previous_lineno = None
+	if event == "line":
+		if the_iteration == 1 and frame.f_lineno == the_line:
+			frame.f_locals.update(the_diff)
+		if not the_previous_lineno:
+			the_previous_lineno = frame.f_lineno
+		elif frame.f_lineno < the_previous_lineno:
+			the_iteration -= 1
+		the_previous_lineno = frame.f_lineno
+	return trace_apply_diff
     
     
 # Testing function: Call remove_html_output, stop at THE_LINE/THE_ITERATION, 
