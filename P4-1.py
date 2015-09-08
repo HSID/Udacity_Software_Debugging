@@ -25,6 +25,7 @@ def remove_html_markup(s):
 the_line      = None    # line number of the executed code
 the_iteration = None    # iteration number
 the_state     = None    # the state of the program and variables
+the_previous_lineno = None  ## I set it to sense iteration
 
 # IMPLEMENT THIS !!!
 # This function should trace the function until specified
@@ -34,11 +35,22 @@ the_state     = None    # the state of the program and variables
 # You can use the following expression to make a copy of frame.f_locals:
 # the_state = copy.deepcopy(frame.f_locals)
 def trace_fetch_state(frame, event, arg):
-    global the_line
-    global the_iteration
-    global the_state
+	global the_line
+	global the_iteration
+	global the_state
 
     # YOUR CODE HERE
+	global the_previous_lineno
+	if event == "call": the_previous_lineno = None
+	if event == "line":
+		if the_iteration == 1 and frame.f_lineno == the_line:
+			the_state = copy.deepcopy(frame.f_locals)
+		if not the_previous_lineno:
+			the_previous_lineno = frame.f_lineno
+		elif frame.f_lineno < the_previous_lineno:
+			the_iteration -= 1
+		the_previous_lineno = frame.f_lineno
+	return trace_fetch_state
 
 # This function allows you to get the state of the program
 # at specified line and iteration and return it
