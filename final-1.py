@@ -72,6 +72,28 @@ def debug(command, my_locals):
         # PS1 CODE
     elif command.startswith('d'):    # delete watch/break point
         # YOUR CODE HERE
+        commandList = command.split()
+        if len(commandList) != 3:
+            print "Incorrect command"
+            return True
+        if commandList[1] == 'b':
+            if not all(['0' <= cc <= '9' for cc in commandList[2]]):
+                print "Incorrect command"
+                return True
+            else:
+                cc = int(commandList[2])
+                del(breakpoints[cc])
+                return True
+        if commandList[1] == 'w':
+            if type(commandList[2]) != str:
+                print "Incorrect command"
+                return True
+            else:
+                del(watchpoints[commandList[2]])
+                return True
+        else:
+            print "Incorrect command"
+            return True
     elif command.startswith('q'):   # quit
         print "Exiting my-spyder..."
         sys.exit(0)
