@@ -28,21 +28,26 @@ the_state     = None
 the_diff      = None
 the_input     = None
 the_previous_lineno = None  ## I set it to sense iteration
+the_hit_flag = True ## I set it to tag the hit of the pre-defined line and iteration
 
 # FILL IN FROM YOUR SOLUTION IN THE PREVIOUS EXERCISE
 def trace_fetch_state(frame, event, arg):
-    global the_line
-    global the_iteration
-    global the_state
-    # COPY YOUR CODE HERE
+	global the_line
+	global the_iteration
+	global the_state
+	# COPY YOUR CODE HERE
 	global the_previous_lineno
-	if event == "call": the_previous_lineno = None
+	global the_hit_flag
+	if event == "call": 
+		the_previous_lineno = None
+		the_hit_flag = True
 	if event == "line":
-		if the_iteration == 1 and frame.f_lineno == the_line:
+		if the_iteration <= 1 and frame.f_lineno >= the_line and the_hit_flag:
 			the_state = copy.deepcopy(frame.f_locals)
+			the_hit_flag = False
 		if not the_previous_lineno:
 			the_previous_lineno = frame.f_lineno
-		elif frame.f_lineno < the_previous_lineno:
+		elif frame.f_lineno < the_previous_lineno and the_hit_flag:
 			the_iteration -= 1
 		the_previous_lineno = frame.f_lineno
 	return trace_fetch_state
@@ -73,19 +78,23 @@ def get_state(input, line, iteration):
 # frame.f_locals.update(the_diff)
 
 def trace_apply_diff(frame, event, arg):
-    global the_line
-    global the_iteration
-    global the_diff
+	global the_line
+	global the_iteration
+	global the_diff
 
-    # YOUR CODE HERE
+	# YOUR CODE HERE
 	global the_previous_lineno
-	if event == "call": the_previous_lineno = None
+	global the_hit_flag
+	if event == "call": 
+		the_previous_lineno = None
+		the_hit_flag = True
 	if event == "line":
-		if the_iteration == 1 and frame.f_lineno == the_line:
+		if the_iteration <= 1 and frame.f_lineno >= the_line and the_hit_flag:
 			frame.f_locals.update(the_diff)
+			the_hit_flag = False
 		if not the_previous_lineno:
 			the_previous_lineno = frame.f_lineno
-		elif frame.f_lineno < the_previous_lineno:
+		elif frame.f_lineno < the_previous_lineno and the_hit_flag:
 			the_iteration -= 1
 		the_previous_lineno = frame.f_lineno
 	return trace_apply_diff
@@ -133,7 +142,7 @@ def run_tests():
         print True
 
     the_line      = 10
-    the_iteration = 1
+    the_iteration = 2
     if not test([('quote', True)]) == "FAIL":
         print "The value 'quote' was not updated correctly"        
     else:
