@@ -2,7 +2,6 @@
 # Simple debugger
 # See instructions around line 85
 import sys
-import readline
 
 # Our buggy program
 def remove_html_markup(s):
@@ -57,6 +56,7 @@ def debug(command, my_locals):
         pass
     elif command.startswith('w'):    # watch variable
         # YOUR CODE HERE
+        watchpoints[arg] = True
         
     elif command.startswith('q'):   # quit
         print "Exiting my-spyder..."
@@ -86,10 +86,24 @@ somevar ":", repr(old-value), "=>", repr(new-value)
 when the value of the variable has changed.
 If the value is unchanged, do not print anything.
 """
+variableDict = {}
 def traceit(frame, event, trace_arg):
     global stepping
+    global variableDict
+
+    if event == "call":
+        variableDict = frame.f_locals.copy()
 
     if event == 'line':
+        for variable in watchpoints.keys():
+            if variable in frame.f_locals:
+                if (variable in variableDict) and (variableDict[variable] != frame.f_locals[variable]):
+                    print event, frame.f_lineno, frame.f_code.co_name
+                    print variable, ":", repr(variableDict[variable]), "=>", repr(frame.f_locals[variable])
+                elif not (variable in variableDict):
+                    print event, frame.f_lineno, frame.f_code.co_name
+                    print variable, ":", "Initialized", "=>", repr(frame.f_locals[variable])
+        variableDict = frame.f_locals.copy()
         if stepping or breakpoints.has_key(frame.f_lineno):
             resume = False
             while not resume:
@@ -99,9 +113,9 @@ def traceit(frame, event, trace_arg):
     return traceit
 
 # Using the tracer
-#sys.settrace(traceit)
-#main()
-#sys.settrace(None)
+sys.settrace(traceit)
+main()
+sys.settrace(None)
 
 # with the commands = ["w c", "c", "c", "w out", "c", "c", "c", "q"],
 # the output should look like this (line numbers may be different):
