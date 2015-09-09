@@ -16,9 +16,9 @@ import math
 # correlates the most with failure, fill in the following 3 variables,
 # Do NOT set these values dynamically.
 
-answer_function = "X"   # One of f1, f2, f3
-answer_bin = 42         # One of 1, 0, -1
-answer_value = 1.0000   # precision to 4 decimal places.
+answer_function = "f3"   # One of f1, f2, f3
+answer_bin = -1         # One of 1, 0, -1
+answer_value = 0.8165   # precision to 4 decimal places.
 
 # The buggy program
 def remove_html_markup(s):
